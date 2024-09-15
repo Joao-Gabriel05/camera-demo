@@ -33,7 +33,7 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.11',
+    python_requires='>=3.9.6',
     entry_points={
         'console_scripts': [
             f'camera-cli={MODULE_STUB}.main:app',

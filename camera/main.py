@@ -5,10 +5,17 @@ from rich.console import Console
 import typer
 import cv2 as cv
 import numpy as np
+import math
 
 app = typer.Typer(no_args_is_help=True)
 console = Console()
-
+def criar_indices(min_i, max_i, min_j, max_j):
+    import itertools
+    L = list(itertools.product(range(min_i, max_i), range(min_j, max_j)))
+    idx_i = np.array([e[0] for e in L])
+    idx_j = np.array([e[1] for e in L])
+    idx = np.vstack( (idx_i, idx_j) )
+    return idx
 @app.command('info')
 def print_info(custom_message : str = ""):
     """
@@ -22,50 +29,83 @@ def print_info(custom_message : str = ""):
 
 @app.command() # Defines a default action
 def run():
-    # """
-    # Probably run the main function of the module
-    # """
-    # print("Hello world!")
-    # camera.my_function()
-    # script_path = Path(os.path.abspath(__file__))
-    # parent_path = script_path.parent
-    # print("Script path:", script_path)
-    # with open(parent_path / "assets/poetry.txt") as f:
-    #     print(f.read())
-    # with open(parent_path / "assets/test_folder/test_something.txt") as f:
-    #     print(f.read())
-        # Essa função abre a câmera. Depois desta linha, a luz de câmera (se seu computador tiver) deve ligar.
+    """
+    Probably run the main function of the module
+    """
     cap = cv.VideoCapture(0)
 
-    # Aqui, defino a largura e a altura da imagem com a qual quero trabalhar.
-    # Dica: imagens menores precisam de menos processamento!!!
     width = 320
     height = 240
-
-    # Talvez o programa não consiga abrir a câmera. Verifique se há outros dispositivos acessando sua câmera!
     if not cap.isOpened():
         print("Não consegui abrir a câmera!")
         exit()
 
-    # Esse loop é igual a um loop de jogo: ele encerra quando apertamos 'q' no teclado.
+    theta = 0
+    aumento = 0
+    expansao=1
     while True:
-        # Captura um frame da câmera
-        ret, frame = cap.read()
+        tecla = cv.waitKey(1)
+        if tecla == ord('w'):
+            aumento += 0.1
+        elif tecla == ord('s'):
+            aumento -= 0.075
+        if tecla == ord('e'):
+            aumento_expansao = 0.05
+            expansao += aumento_expansao
+        if tecla == ord('d'):
+            diminuicao_expansao = 0.05
+            expansao -= diminuicao_expansao
+        if tecla == ord('r'):
+            theta = 0
+            aumento = 0
+            expansao = 1
+        if aumento > 2.5:
+            aumento = 2.5
+        elif aumento < -2.5:
+            aumento = -2.5
 
-        # A variável `ret` indica se conseguimos capturar um frame
+        theta += aumento
+
+        if expansao > 4:
+            expansao = 4
+        elif expansao < 0.25:
+            expansao = 0.25
+        ret, frame = cap.read()
         if not ret:
             print("Não consegui capturar frame!")
             break
 
-        # Mudo o tamanho do meu frame para reduzir o processamento necessário
-        # nas próximas etapas
         frame = cv.resize(frame, (width,height), interpolation =cv.INTER_AREA)
-
-        # A variável image é um np.array com shape=(width, height, colors)
         image = np.array(frame).astype(float)/255
+        image_ = np.zeros_like(image)
+        Xd = criar_indices(0, height, 0, width)
+        Xd = np.vstack ( (Xd, np.ones( Xd.shape[1]) ) )
+
+        T = np.array([[1, 0, -(height//2)], 
+                    [0, 1, -(width//2)], 
+                    [0, 0,1]])
+        R = np.array([[np.cos(theta), -np.sin(theta), 0], 
+                      [np.sin(theta), np.cos(theta), 0],
+                        [0, 0, 1]])
+        E = np.array([[expansao, 0, 0], 
+                      [0, expansao, 0], 
+                      [0, 0, 1]])
+        T_inv = np.linalg.inv(T)
+        Tr = T_inv@R@E@T
+        X  = np.linalg.inv(Tr)@Xd
+        Xd = Xd.astype(int)
+        X = X.astype(int)
+
+        Xd[0,:] = np.clip(Xd[0,:], 0, height)
+        Xd[1,:] = np.clip(Xd[1,:], 0, width)
+        filtro = (X[0,:] < height) & (X[1,:] < width) & (X[0,:] >= 0) & (X[1,:] >= 0)
+        Xd = Xd[:, filtro] 
+        X = X[:, filtro] 
+
+        image_[Xd[0,:], Xd[1,:], :] = image[X[0,:], X[1,:], :]
 
         # Agora, mostrar a imagem na tela!
-        cv.imshow('Minha Imagem!', image)
+        cv.imshow('Minha Imagem!', image_)
         
         # Se aperto 'q', encerro o loop
         if cv.waitKey(1) == ord('q'):
@@ -76,4 +116,6 @@ def run():
     cv.destroyAllWindows()
 
 if __name__ == "__main__":
+    run()
     app()
+run()

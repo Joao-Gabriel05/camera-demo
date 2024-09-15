@@ -1,3 +1,3 @@
 [console_scripts]
-camera-cli = camera.main:app
+camera-cli = camera.main:main
 

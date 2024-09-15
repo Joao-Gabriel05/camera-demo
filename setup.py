@@ -36,7 +36,7 @@ setup(
     python_requires='>=3.9.6',
     entry_points={
         'console_scripts': [
-            f'camera-cli={MODULE_STUB}.main:main',
+            f'camera-cli={MODULE_STUB}.main:app',
         ],
     },
     install_requires=[  # Instala as dependências especificadas no requirements.txt

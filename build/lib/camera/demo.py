@@ -44,7 +44,7 @@ def run():
     aumento = 0
     expansao=1
     while True:
-        tecla = cv.waitKey(5)
+        tecla = cv.waitKey(1)
         if tecla == ord('w'):
             aumento += 0.1
         if tecla == ord('s'):
@@ -60,17 +60,7 @@ def run():
             aumento = 0
             expansao = 1
 
-        if aumento > 2.5:
-            aumento = 2.5
-        elif aumento < -2.5:
-            aumento = -2.5
-
         theta += aumento
-
-        if expansao > 4:
-            expansao = 4
-        elif expansao < 0.25:
-            expansao = 0.25
 
         ret, frame = cap.read()
         if not ret:
@@ -110,7 +100,7 @@ def run():
         cv.imshow('Minha Imagem!', image_)
         
         # Se aperto 'q', encerro o loop
-        if cv.waitKey(1) == ord('q'):
+        if tecla == ord('q'):
             break
 
     # Ao sair do loop, vamos devolver cuidadosamente os recursos ao sistema!

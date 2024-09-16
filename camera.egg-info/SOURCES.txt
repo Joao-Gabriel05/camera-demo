@@ -2,6 +2,7 @@ LICENSE
 README.md
 setup.py
 camera/__init__.py
+camera/demo.py
 camera/main.py
 camera/my_lib.py
 camera.egg-info/PKG-INFO

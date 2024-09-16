@@ -12,7 +12,7 @@ A primeira maneira é clonar o repositório e fazer uma instalação local:
 
 Após instalar, o programa deve estar instalado. Então, executando o comando:
 
-    camera_cli
+    camera-cli
 
 
 

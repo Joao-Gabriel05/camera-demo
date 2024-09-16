@@ -44,7 +44,7 @@ def run():
     aumento = 0
     expansao=1
     while True:
-        tecla = cv.waitKey(1)
+        tecla = cv.waitKey(5)
         if tecla == ord('w'):
             aumento += 0.1
         elif tecla == ord('s'):
@@ -118,4 +118,3 @@ def run():
 if __name__ == "__main__":
     run()
     app()
-run()
